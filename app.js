@@ -7,6 +7,12 @@ require('dotenv').config();
 // Import routes
 const authRoute = require('./routes/auth');
 
+// Setup cors options
+const corsOptions = {
+  origin: ['http://localhost:3000'],
+  credentials: true,
+};
+
 // Connect to DB
 mongoose
   .connect(process.env.DB_HOST, { useNewUrlParser: true, useUnifiedTopology: true })
@@ -15,7 +21,7 @@ mongoose
 
 // Setup middleware
 app.use(express.json());
-app.use(cors({exposedHeaders: ['Access-Token']}));
+app.use(cors(corsOptions));
 
 // Route middlewares
 app.use('/api/users', authRoute);

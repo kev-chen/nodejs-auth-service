@@ -3,6 +3,7 @@ const User = require('../models/User');
 const validationSchemas = require('../validation');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const constants = require('../common/constants');
 
 router.post('/register', async (req, res, next) => {
   // Validate the data before adding a user
@@ -40,21 +41,33 @@ router.post('/login', async (req, res, next) => {
 
   // Check if the email exists
   const user = await User.findOne({ email: req.body.email });
-  if (!user) return res.status(401).send('Email is incorrect');
+  if (!user) return res.status(400).send('The email or password is incorrect.');
 
   // Check if password is correct
   const validPass = await bcrypt.compare(req.body.password, user.password);
-  if (!validPass) return res.status(400).send('Password is incorrect');
+  if (!validPass) return res.status(400).send('The email or password is incorrect.');
 
   // Create and assign a token
   const token = jwt.sign({ userId: user._id }, process.env.SECRET, {
     algorithm: 'HS256',
-    expiresIn: 60 * 60,
+    expiresIn: constants.EXPIRES_IN,
   });
 
-  res.header('Access-Token', token);
+  // Two cookie authentication scheme
+  // See https://miro.medium.com/max/1400/1*zwssp_fcvLG12uk3nuTgvA.png
+  let [header, payload, signature] = token.split('.');
+  res.cookie(constants.JWT_SIGNATURE_COOKIE, signature, {
+    maxAge: constants.EXPIRES_IN * 1000,
+    httpOnly: true,
+    // secure: true,
+  });
 
-  res.send({ access_token: token });
+  res.cookie(constants.JWT_HEADER_PAYLOAD_COOKIE, `${header}.${payload}`, {
+    maxAge: constants.EXPIRES_IN * 1000,
+    // secure: true,
+  });
+
+  res.send({ message: 'Successfully logged in' });
 });
 
 module.exports = router;
