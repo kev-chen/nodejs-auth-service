@@ -4,15 +4,10 @@
  */
 
 const userRepository = require('../repositories/UserRepository');
-const loginDtoValidator = require('../dto/LoginValidator');
-const registerDtoValidator = require('../dto/RegisterValidator');
 const crypto = require('crypto');
 
 const usersService = {
   authenticate: async (loginDto) => {
-    // Validate the DTO
-    const { error } = loginDtoValidator.validate(loginDto);
-    if (error) throw new Error(error.details[0].message);
 
     const { username, password } = loginDto;
 
@@ -28,10 +23,6 @@ const usersService = {
     return user;
   },
   create: async (registerDto) => {
-    // Validate the DTO
-    const { error } = registerDtoValidator.validate(registerDto);
-    if (error) throw new Error(error.details[0].message);
-
     // Check if the username already exists
     const user = await userRepository.getByUsername(registerDto.username);
     if (user) throw new Error(`The username ${registerDto.username} is already taken`);

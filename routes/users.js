@@ -2,29 +2,21 @@ const router = require('express').Router();
 const jwt = require('jsonwebtoken');
 const constants = require('../common/constants');
 const usersService = require('../services/UserService');
-const registerDtoValidator = require('../dto/RegisterValidator');
-const loginDtoValidator = require('../dto/LoginValidator');
+const assertLoginDto = require('../middleware/assertLoginDto');
+const assertRegisterDto = require('../middleware/assertRegisterDto');
 
-router.post('/register', async (req, res, next) => {
-  // Validate the data before adding a user
-  const { error } = registerDtoValidator.validate(req.body);
-  if (error) return res.status(400).send(error.details[0].message);
-
+router.post('/', assertRegisterDto,  async (req, res, next) => {
   try {
-    await usersService.create(req.body);
+    await usersService.create(req.registerDto);
     return res.status(201).send();
   } catch (e) {
     return res.status(400).send({ message: e.message });
   }
 });
 
-router.post('/login', async (req, res, next) => {
-  // Validate the data before adding a user
-  const { error } = loginDtoValidator.validate(req.body);
-  if (error) return res.status(400).send(error.details[0].message);
-
+router.post('/login', assertLoginDto,  async (req, res, next) => {
   try {
-    let authenticatedUser = await usersService.authenticate(req.body);
+    let authenticatedUser = await usersService.authenticate(req.loginDto);
     if (!authenticatedUser)
       return res.status(400).send({ message: 'The username or password is incorrect' });
 
@@ -58,6 +50,7 @@ router.post('/login', async (req, res, next) => {
       token,
     });
   } catch (e) {
+    console.log(e);
     return res.status(400).send({ message: e.message });
   }
 });
