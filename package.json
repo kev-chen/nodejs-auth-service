@@ -5,8 +5,10 @@
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "cp .env.production .env && node app.js",
-    "start-dev": "cp .env.development .env && nodemon app.js"
+    "start": "node app.js",
+    "start-dev": "cp .env.development .env && nodemon app.js",
+    "push-staging": "git push heroku-dev master",
+    "push": "git push heroku master"
   },
   "keywords": [],
   "author": "",
