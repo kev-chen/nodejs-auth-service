@@ -8,7 +8,6 @@ const crypto = require('crypto');
 
 const usersService = {
   authenticate: async (loginDto) => {
-
     const { username, password } = loginDto;
 
     // Find the user
@@ -16,8 +15,8 @@ const usersService = {
     if (!user) throw new Error('The username or password is incorrect');
 
     // Check login password against the stored hash
-    const { PasswordHash, PasswordSalt } = user;
-    if (!_verifyPassword(password, PasswordHash, PasswordSalt))
+    const { passwordHash, passwordSalt } = user;
+    if (!_verifyPassword(password, passwordHash, passwordSalt))
       throw new Error('The username or password is incorrect');
 
     return user;
